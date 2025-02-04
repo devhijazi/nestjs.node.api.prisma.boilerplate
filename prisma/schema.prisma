@@ -12,59 +12,8 @@ model User {
   username    String       @unique
   email       String       @unique
   password    String
-  inspections Inspection[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
 
   @@map("users")
-}
-
-model Inspection {
-  id                   String    @id @default(cuid())
-  inspectionDate       DateTime  @default(now())
-  inspectorSignature   String?
-  driver               String
-  licensePlate         String
-  brandModel           String
-  yearModel            String
-  color                String
-  category             String
-  observations         String?
-  tireSpare            Int
-  glassMirrors         Int
-  taillights           Int
-  headlights           Int
-  directionSignal      Int
-  frontRearSeats       Int
-  seatBelt             Int
-  airConditioning      Int
-  trunk                Int
-  alcoholGelMask       Int
-  driverAcceptanceDate DateTime  @default(now())
-  driverSignature      String?
-  driverSignatureDate  DateTime  @default(now())
-  userId               String
-  user                 User      @relation(fields: [userId], references: [id])
-  problems             Problem[]
-
-  @@map("inspections")
-}
-
-model Problem {
-  id           String         @id @default(cuid())
-  inspection   Inspection     @relation(fields: [inspectionId], references: [id])
-  inspectionId String
-  part         Int
-  images       ProblemImage[]
-
-  @@map("problems")
-}
-
-model ProblemImage {
-  id        String  @id @default(cuid())
-  defect    Problem @relation(fields: [problemId], references: [id])
-  problemId String
-  url       String
-
-  @@map("problem_images")
 }
