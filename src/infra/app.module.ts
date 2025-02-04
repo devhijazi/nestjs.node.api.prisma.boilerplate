@@ -4,6 +4,8 @@ import { envSchema } from './env/env';
 import { EnvModule } from './env/env.module';
 import { AuthModule } from './auth/auth.module';
 import { HttpModule } from './http/http.module';
+import { LoggingInterceptor } from '@/core/interceptors/logging.interceptor';
+import { ExcludePasswordInterceptor } from '@/core/interceptors/exclude-password.interceptor';
 
 @Module({
   imports: [
@@ -15,5 +17,6 @@ import { HttpModule } from './http/http.module';
     HttpModule,
     EnvModule,
   ],
+  providers: [LoggingInterceptor, ExcludePasswordInterceptor],
 })
 export class AppModule {}
