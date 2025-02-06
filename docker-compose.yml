@@ -72,6 +72,22 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - '16686:16686'
+      - '4317:4317'
+      - '4318:4318'
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - app_network
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', 'localhost:16686']
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   zookeeper_data:
