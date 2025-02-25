@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 
+import { ExcludePasswordInterceptor } from '@/core/interceptors/exclude-password.interceptor';
+import { LoggingInterceptor } from '@/core/interceptors/logging.interceptor';
 import { AppModule } from './app.module';
 import { EnvService } from './env/env.service';
-import { LoggingInterceptor } from '@/core/interceptors/logging.interceptor';
-import { ExcludePasswordInterceptor } from '@/core/interceptors/exclude-password.interceptor';
 import { tracingService } from './tracing/tracing.service';
 
 async function bootstrap() {
