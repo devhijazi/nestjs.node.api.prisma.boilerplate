@@ -1,5 +1,5 @@
 # Apontamento para o Repositorio Node
-FROM node:18-slim
+FROM node:18-alpine3.19 AS build
 
 # Criando diretório padrão da aplicação
 WORKDIR /usr/src/app
@@ -22,8 +22,19 @@ COPY . .
 # Rodando o comando de build da aplicação
 RUN npm run build
 
+# Instalando dependencias somente de produção
+RUN npm ci --only=production
+
+FROM node:18-alpine3.19 AS runner
+
+WORKDIR /usr/src/app
+
+COPY --from=build /usr/src/app/package.json ./package.json
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
 # Expondo porta do container
 EXPOSE 3333
 
 # Subindo a aplicação
-CMD ["npm","run","start"]
+CMD ["npm","run","start:prod"]
