@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   zookeeper:
+    container_name: nestjs.api.zookeeper
     image: confluentinc/cp-zookeeper:latest
     hostname: zookeeper
     ports:
@@ -11,6 +12,7 @@ services:
       ZOOKEEPER_TICK_TIME: '2000'
 
   broker:
+    container_name: nestjs.api.broker
     image: confluentinc/cp-kafka:5.4.2
     hostname: broker
     depends_on:
@@ -34,6 +36,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   schema-registry:
+    container_name: nestjs.api.schema-registry
     image: confluentinc/cp-schema-registry:5.5.1
     depends_on:
       - zookeeper
@@ -44,8 +47,8 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
   cache:
+    container_name: nestjs.api.redis
     image: redis:latest
-    container_name: redis
     restart: always
     ports:
       - '6379:6379'
@@ -54,27 +57,29 @@ services:
       - REDIS_PORT=6379
       - REDIS_DATABASES=demodb
     networks:
-      - app_network
+      - api-network
 
   postgres:
+    container_name: nestjs.api.postgres
     image: postgres:latest
-    container_name: postgres
+    volumes:
+      - db:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=docker
       - POSTGRES_USER=root
       - POSTGRES_DB=demodb
     ports:
       - '5432:5432'
-    networks:
-      - app_network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U root -d demodb || exit 1']
       interval: 10s
       timeout: 3s
       retries: 3
+    networks:
+      - api-network
   jaeger:
+    container_name: nestjs.api.jeager
     image: jaegertracing/all-in-one:latest
-    container_name: jaeger
     ports:
       - '16686:16686'
       - '4317:4317'
@@ -82,19 +87,33 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     networks:
-      - app_network
+      - api-network
     healthcheck:
       test: ['CMD', 'wget', '--spider', 'localhost:16686']
       interval: 10s
       timeout: 5s
       retries: 3
+  nestjs-api:
+    container_name: nestjs.api
+    build:
+      context: .
+    ports:
+      - 3333:3333
+    depends_on:
+      - postgres
+      - redis
+      - schema-registry
+    networks:
+      - api-network
+
+networks:
+  api-network:
+    driver: bridge
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
     driver: local
-
-networks:
-  app_network:
-    driver: bridge
+  db:
+    driver: local
